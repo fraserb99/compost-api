@@ -10,6 +10,6 @@ namespace CompostApi.Controllers
     {
         [HttpPost]
         [Route("compost")]
-        public void Create()
+        
     }
 }

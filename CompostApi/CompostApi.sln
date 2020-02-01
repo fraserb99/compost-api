@@ -3,9 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.29324.140
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CompostApi", "CompostApi\CompostApi.csproj", "{77D2D99C-D5DA-4D59-8128-6452C3E164AD}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CompostCore", "CompostCore\CompostCore.csproj", "{AB489C15-C3E0-4526-A913-A4CB6B5FCEC8}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebApplication1", "WebApplication1\WebApplication1.csproj", "{38897378-F71F-467D-8CE8-6F8AB0BE00D9}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -13,14 +11,10 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{77D2D99C-D5DA-4D59-8128-6452C3E164AD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{77D2D99C-D5DA-4D59-8128-6452C3E164AD}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{77D2D99C-D5DA-4D59-8128-6452C3E164AD}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{77D2D99C-D5DA-4D59-8128-6452C3E164AD}.Release|Any CPU.Build.0 = Release|Any CPU
-		{AB489C15-C3E0-4526-A913-A4CB6B5FCEC8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{AB489C15-C3E0-4526-A913-A4CB6B5FCEC8}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{AB489C15-C3E0-4526-A913-A4CB6B5FCEC8}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{AB489C15-C3E0-4526-A913-A4CB6B5FCEC8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{38897378-F71F-467D-8CE8-6F8AB0BE00D9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{38897378-F71F-467D-8CE8-6F8AB0BE00D9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{38897378-F71F-467D-8CE8-6F8AB0BE00D9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{38897378-F71F-467D-8CE8-6F8AB0BE00D9}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
