@@ -17,7 +17,7 @@ namespace WebApplication1.Controllers
         private CompostDataContext _context;
         public DeviceController(CompostDataContext context)
         {
-            _context = context;
+            _context = context; 
         }
 
         [HttpPost]
