@@ -36,3 +36,18 @@
     transform: rotate(360deg);
   }
 }
+
+html {
+  background-color: lightgray;
+}
+
+.App-container {
+  margin: 15px auto;
+  background-color: white;
+  max-width: 740px;
+}
+
+.App-frame {
+  background-color: lightgray;
+  min-height: 100vh;
+}
