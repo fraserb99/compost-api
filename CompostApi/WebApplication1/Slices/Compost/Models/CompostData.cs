@@ -11,7 +11,7 @@ namespace CompostApi.Models
     {
         [Key]
         public Guid Id { get; set; }
-        public Guid DeviceId { get; set; }
+        public string DeviceId { get; set; }
         public double Temperature { get; set; }
         public DateTime Created { get; set; }
     }

@@ -4,14 +4,16 @@ using CompostApi.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace WebApplication1.Migrations
 {
     [DbContext(typeof(CompostDataContext))]
-    partial class CompostDataContextModelSnapshot : ModelSnapshot
+    [Migration("20200202122259_AddUser")]
+    partial class AddUser
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -73,8 +75,6 @@ namespace WebApplication1.Migrations
                         .ValueGeneratedOnAdd();
 
                     b.Property<string>("Email");
-
-                    b.Property<string>("Password");
 
                     b.Property<string>("Username");
 

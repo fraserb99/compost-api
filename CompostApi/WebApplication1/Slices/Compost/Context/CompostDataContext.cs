@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 using WebApplication1.Slices.Devices.Models;
+using WebApplication1.Slices.Users.Models;
 
 namespace CompostApi.Models
 {
@@ -20,7 +21,9 @@ namespace CompostApi.Models
             base.OnConfiguring(optionsBuilder);
         }
 
-        internal DbSet<CompostData> CompostData { get;set; }
+        internal DbSet<CompostData> CompostData { get; set; }
         internal DbSet<Device> Devices { get; set; }
+        internal DbSet<User> Users { get; set; }
+        internal DbSet<DeviceUser> DeviceUsers { get; set; }
     }
 }

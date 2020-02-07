@@ -4,14 +4,16 @@ using CompostApi.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace WebApplication1.Migrations
 {
     [DbContext(typeof(CompostDataContext))]
-    partial class CompostDataContextModelSnapshot : ModelSnapshot
+    [Migration("20200202112856_DeviceIdToString")]
+    partial class DeviceIdToString
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -49,56 +51,11 @@ namespace WebApplication1.Migrations
                     b.ToTable("Devices");
                 });
 
-            modelBuilder.Entity("WebApplication1.Slices.Users.Models.DeviceUser", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd();
-
-                    b.Property<string>("DeviceId");
-
-                    b.Property<Guid?>("UserId");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("DeviceId");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("DeviceUsers");
-                });
-
-            modelBuilder.Entity("WebApplication1.Slices.Users.Models.User", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd();
-
-                    b.Property<string>("Email");
-
-                    b.Property<string>("Password");
-
-                    b.Property<string>("Username");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Users");
-                });
-
             modelBuilder.Entity("CompostApi.Models.CompostData", b =>
                 {
                     b.HasOne("WebApplication1.Slices.Devices.Models.Device")
                         .WithMany("CompostData")
                         .HasForeignKey("DeviceId");
-                });
-
-            modelBuilder.Entity("WebApplication1.Slices.Users.Models.DeviceUser", b =>
-                {
-                    b.HasOne("WebApplication1.Slices.Devices.Models.Device", "Device")
-                        .WithMany()
-                        .HasForeignKey("DeviceId");
-
-                    b.HasOne("WebApplication1.Slices.Users.Models.User", "User")
-                        .WithMany("DeviceUsers")
-                        .HasForeignKey("UserId");
                 });
 #pragma warning restore 612, 618
         }

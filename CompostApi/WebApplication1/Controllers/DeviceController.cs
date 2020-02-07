@@ -21,10 +21,13 @@ namespace WebApplication1.Controllers
         }
 
         [HttpPost]
-        public void Post([FromBody] Device device)
+        public ActionResult Post([FromBody] Device device)
         {
+            var dup = _context.Devices.Where(x => x.Id == device.Id);
+            if (dup != null) return Conflict("This device already exists");
             _context.Devices.Add(device);
             _context.SaveChanges();
+            return Ok(device);
         }
 
         [HttpGet]
@@ -32,6 +35,17 @@ namespace WebApplication1.Controllers
         {
             var devices = _context.Devices.Include(device => device.CompostData).ToList();
             return Ok(devices);
+        }
+
+        [HttpGet]
+        [Route("{id}")]
+        public ActionResult<Device> GetById(string id)
+        {
+            var device = _context.Devices.Where(x => x.Id == id).Include(x => x.CompostData).FirstOrDefault();
+
+            if (device == null) return NotFound();
+
+            return Ok(device);
         }
 
         [HttpPut]

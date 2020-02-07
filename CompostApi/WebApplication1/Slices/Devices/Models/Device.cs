@@ -8,7 +8,7 @@ namespace WebApplication1.Slices.Devices.Models
 {
     public class Device
     {
-        public Guid Id { get; set; }
+        public string Id { get; set; }
         public string Name { get; set; }
         public List<CompostData> CompostData { get; set; }
     }
