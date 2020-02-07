@@ -17,18 +17,21 @@ namespace WebApplication1.Controllers
     public class UsersController : ControllerBase
     {
         private readonly CompostDataContext _context;
+        private readonly IMapper _mapper;
 
-        public UsersController(CompostDataContext context)
+        public UsersController(CompostDataContext context, IMapper mapper)
         {
             _context = context;
+            _mapper = mapper;
         }
 
         // GET: /users
         [HttpGet]
-        public IEnumerable<User> GetUsers()
+        public IActionResult GetUsers()
         {
-            var users = _context.Users.Include(x => x.DeviceUsers).ToList();
-            return users;
+            var users = _context.Users.Include(x => x.DeviceUsers).ThenInclude(x => x.Device.CompostData).ToList();
+            var userDtos = _mapper.Map<List<UserDto>>(users);
+            return Ok(userDtos);
         }
 
         // GET: users/5
@@ -46,6 +49,8 @@ namespace WebApplication1.Controllers
             {
                 return NotFound();
             }
+
+            //var userDto = _mapper.Map<UserDto>(user);
 
             return Ok(user);
         }
@@ -158,7 +163,7 @@ namespace WebApplication1.Controllers
             _context.DeviceUsers.Add(deviceUser);
             _context.SaveChanges();
 
-            return Created($"localhost:44341/users/{user.Id}", deviceUser);
+            return CreatedAtAction("AddDevice", user);
         }
 
         private bool UserExists(Guid id)

@@ -9,5 +9,10 @@ namespace WebApplication1.Slices.Users.ObjectMapping
 {
     public class UserProfile : Profile
     {
+        public UserProfile()
+        {
+            CreateMap<User, UserDto>()
+                .ForMember(x => x.Devices, opt => opt.MapFrom(y => y.DeviceUsers.Select(x => x.Device)));
+        }
     }
 }
