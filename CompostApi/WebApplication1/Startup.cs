@@ -2,19 +2,27 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Security.Claims;
+using System.Text;
 using System.Threading.Tasks;
 using AutoMapper;
 using CompostApi.Models;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.Tokens;
+using WebApplication1.Infrastucture;
 using WebApplication1.Mapping;
 using WebApplication1.Slices.Devices;
+using WebApplication1.Slices.Users.Models;
 
 namespace WebApplication1
 {
@@ -32,8 +40,43 @@ namespace WebApplication1
         {
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
             services.AddDbContext<CompostDataContext>();
-            //var config = MappingProfile.InitializeAutoMapper();
-            //services.AddSingleton<IMapper>(new Mapper(config));
+            services.Configure<AppSettings>(Configuration.GetSection("AppSettings"));
+
+            var appSettings = Configuration.GetSection("AppSettings").Get<AppSettings>();
+            var key = Encoding.ASCII.GetBytes(appSettings.JwtSecret);
+            services.AddAuthentication(x =>
+            {
+                x.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                x.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            })
+            .AddJwtBearer(x =>
+            {
+                x.Events = new JwtBearerEvents
+                {
+                    OnTokenValidated = context =>
+                    {
+                        var db = context.HttpContext.RequestServices.GetRequiredService<CompostDataContext>();
+                        var userId = new Guid(context.Principal.Identity.Name);
+                        var user = db.Users.Find(userId);
+                        if (user == null)
+                        {
+                            // return unauthorized if user no longer exists
+                            context.Fail("Unauthorized");
+                        }
+
+                        return Task.CompletedTask;
+                    }
+                };
+                x.RequireHttpsMetadata = false;
+                x.SaveToken = true;
+                x.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKey = new SymmetricSecurityKey(key),
+                    ValidateIssuer = false,
+                    ValidateAudience = false
+                };
+            });
 
             services.AddAutoMapper(typeof(Startup));
         }
@@ -52,6 +95,7 @@ namespace WebApplication1
 
             app.UseHttpsRedirection();
             app.UseMvc();
+            app.UseAuthentication();
         }
     }
 }

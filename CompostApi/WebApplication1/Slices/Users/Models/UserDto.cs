@@ -12,5 +12,7 @@ namespace WebApplication1.Slices.Users.Models
         public string Email { get; set; }
         public string Username { get; set; }
         public IEnumerable<DeviceDto> Devices { get; set; }
+        public string Token { get; set; }
+        public string Role { get; set; } 
     }
 }

@@ -9,9 +9,14 @@ using CompostApi.Models;
 using WebApplication1.Slices.Users.Models;
 using Microsoft.AspNetCore.Identity;
 using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
+using System.Security;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using WebApplication1.Infrastucture;
 
 namespace WebApplication1.Controllers
 {
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     [Route("users")]
     [ApiController]
     public class UsersController : ControllerBase
@@ -26,9 +31,14 @@ namespace WebApplication1.Controllers
         }
 
         // GET: /users
+        //[Authorize(Roles = "Admin")]
         [HttpGet]
         public IActionResult GetUsers()
         {
+            if (!IsCurrentAdmin())
+            {
+                return Forbid();
+            }
             var users = _context.Users.Include(x => x.DeviceUsers).ThenInclude(x => x.Device.CompostData).ToList();
             var userDtos = _mapper.Map<List<UserDto>>(users);
             return Ok(userDtos);
@@ -43,6 +53,11 @@ namespace WebApplication1.Controllers
                 return BadRequest(ModelState);
             }
 
+            if (id.ToString() != HttpContext.User.Identity.Name)
+            {
+                return Forbid();
+            }
+
             var user = await _context.Users.Include(x => x.DeviceUsers).FirstOrDefaultAsync(x => x.Id == id);
 
             if (user == null)
@@ -50,9 +65,9 @@ namespace WebApplication1.Controllers
                 return NotFound();
             }
 
-            //var userDto = _mapper.Map<UserDto>(user);
+            var userDto = _mapper.Map<UserDto>(user);
 
-            return Ok(user);
+            return Ok(userDto);
         }
 
         // PUT: users/5
@@ -91,6 +106,7 @@ namespace WebApplication1.Controllers
         }
 
         // POST: users
+        [AllowAnonymous]
         [HttpPost]
         public async Task<IActionResult> PostUser([FromBody] User user)
         {
@@ -175,7 +191,17 @@ namespace WebApplication1.Controllers
         {
             return _context.Users.Any(e => e.Id == id)
                 || _context.Users.Any(x => x.Email == email)
-                || _context.Users.Any(x => x.Username == username);
+                || _context.Users.Any(x => x.Username == username && username != null);
+        }
+
+        private bool IsCurrentAdmin()
+        {
+            var currentUser = _context.Users.Find(HttpContext.User.Identity.Name);
+            if (currentUser.Role == Role.Admin)
+            {
+                return true;
+            }
+            return false;
         }
     }
 }
