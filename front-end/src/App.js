@@ -2,18 +2,17 @@ import React from 'react';
 import logo from './logo.svg';
 import './App.scss';
 import { Row, Col } from 'react-bootstrap';
-import { BrowseRouter, Route } from 'react-router-dom';
+import { BrowserRouter, Route } from 'react-router-dom';
+import { HomePage } from './Slices/Home/HomePage';
 
 function App() {
   return (
     <Row className='App-frame'>
-      <Col>
       <div className='App-container'>
-        <BrowseRouter>
-          <Route path='' component={} />
-        </BrowseRouter>
+        <BrowserRouter>
+          <Route exact path='/' component={HomePage}  />
+        </BrowserRouter>
       </div>
-      </Col>
     </Row>
   );
 }

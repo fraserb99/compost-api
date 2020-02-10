@@ -1,5 +1,14 @@
 .App {
   text-align: center;
+  font-family: Verdana, Geneva, Tahoma, sans-serif;
+}
+
+html {
+  min-height: 100vh;
+}
+
+h1 {
+  color: grey;
 }
 
 .App-logo {
@@ -44,10 +53,13 @@ html {
 .App-container {
   margin: 15px auto;
   background-color: white;
-  max-width: 740px;
+  max-width: 1080px;
+  border-radius: 5px;
+  padding: 10px;
+  height: calc(100vh - 50px);
 }
 
 .App-frame {
   background-color: lightgray;
-  min-height: 100vh;
+  min-height: calc(100vh - 15px);
 }
