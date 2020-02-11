@@ -46,20 +46,18 @@ h1 {
   }
 }
 
-html {
-  background-color: lightgray;
-}
-
 .App-container {
-  margin: 15px auto;
   background-color: white;
-  max-width: 1080px;
-  border-radius: 5px;
-  padding: 10px;
-  height: calc(100vh - 50px);
+  width: 100vw;
+  min-height: calc(100vh);
 }
 
 .App-frame {
-  background-color: lightgray;
-  min-height: calc(100vh - 15px);
+  //min-height: calc(100vh - 15px);
+}
+
+@media only screen and (max-width: 600px) {
+  .container {
+    padding: 0 5px !important;
+  }
 }

@@ -22,6 +22,10 @@ namespace WebApplication1.Controllers
         [HttpPost]
         public ActionResult Create(CompostData data)
         {
+            if (data.Created == null)
+            {
+                data.Created = DateTime.UtcNow;
+            }
             var previous = _context.CompostData.AsQueryable().Where(x => x.DeviceId == data.DeviceId && x.Created == data.Created).FirstOrDefault();
             if (previous != null) return Conflict();
 
@@ -46,6 +50,14 @@ namespace WebApplication1.Controllers
         public ActionResult<List<CompostData>> Get()
         {
             var data = _context.CompostData.ToList();
+            return Ok(data);
+        }
+
+        [HttpGet]
+        [Route("{deviceId}")]
+        public IActionResult GetForDevice(string deviceId)
+        {
+            var data = _context.CompostData.Where(x => x.DeviceId == deviceId);
             return Ok(data);
         }
     }
