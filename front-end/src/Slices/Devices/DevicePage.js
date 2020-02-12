@@ -2,12 +2,13 @@ import React, { useState, useCallback, useEffect } from 'react';
 import { getDataforDevice } from './actions';
 //import { LineChart, CartesianGrid, XAxis, Line, Label, Legend, YAxis, ResponsiveContainer } from 'recharts';
 import moment from 'moment';
-import { FlexibleWidthXYPlot, LineSeries, VerticalGridLines, HorizontalGridLines, Line, LineSeriesCanvas, XAxis, YAxis, LineMarkSeries } from 'react-vis';
+import { FlexibleWidthXYPlot, LineSeries, VerticalGridLines, HorizontalGridLines, Line, LineSeriesCanvas, XAxis, YAxis, LineMarkSeries, Hint } from 'react-vis';
 
 export const DevicePage = props => {
     const deviceId = props.match.params.deviceId;
     const [compostData, setCompostData] = useState();
     const [chartData, setChartData] = useState();
+    const [currentData, setCurrentData] = useState();
 
     const fetchData = useCallback(async () => {
         var data = await getDataforDevice(deviceId);
@@ -34,20 +35,30 @@ export const DevicePage = props => {
     return (
         <div>
             <h1>Device: {deviceId}</h1>
-            <FlexibleWidthXYPlot height={300} xType='time-utc'>
+            <FlexibleWidthXYPlot height={300} xType='time-utc' onMouseLeave={() => setCurrentData(null)}>
                 <VerticalGridLines />
                 <HorizontalGridLines />
                 <XAxis tickTotal={5} />
-                <YAxis title='Temp' position='middle'/>
+                <YAxis title='Temp' position='middle'
+                />
                 <LineMarkSeries
                     style={{
-                    strokeWidth: '3px'
+                    strokeWidth: '2px'
                     }}
                     lineStyle={{stroke: 'red'}}
-                    markStyle={{stroke: 'blue'}}
+                    markStyle={{stroke: 'red', fill: 'red'}}
+                    size={3}
+                    curve={'curveMonotoneX'}
                     data={chartData}
-                    
+                    onNearestXY={(value) => {
+                        console.log(value)
+                        setCurrentData(value)
+                        }}
                 />
+                {currentData && <Hint 
+                    value={currentData} 
+                    format={(data) => ([{title: 'Temp.', value: data.y}])}
+                />}
             </FlexibleWidthXYPlot>
             {/* <ResponsiveContainer height={600} width='100%'>
                 <LineChart
