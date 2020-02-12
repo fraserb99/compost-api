@@ -1,4 +1,5 @@
 ﻿using CompostApi.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -6,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using WebApplication1.Infrastucture.Middleware;
 using WebApplication1.Slices.Devices;
 using WebApplication1.Slices.Devices.Models;
 
@@ -32,8 +34,10 @@ namespace WebApplication1.Controllers
         }
 
         [HttpGet]
+        [Authorize(Roles = "Admin")]
         public ActionResult<List<Device>> Get()
         {
+            var user = HttpContext.User;
             var devices = _context.Devices.Include(device => device.CompostData).ToList();
             return Ok(devices);
         }

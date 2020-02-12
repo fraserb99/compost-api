@@ -20,6 +20,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using WebApplication1.Infrastucture;
+using WebApplication1.Infrastucture.Middleware;
 using WebApplication1.Mapping;
 using WebApplication1.Middleware;
 using WebApplication1.Slices.Devices;
@@ -67,9 +68,11 @@ namespace WebApplication1
                             // return unauthorized if user no longer exists
                             context.Fail("Unauthorized");
                         }
-
+                        
+                        
                         return Task.CompletedTask;
                     }
+
                 };
                 x.RequireHttpsMetadata = false;
                 x.SaveToken = true;

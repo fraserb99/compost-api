@@ -31,14 +31,10 @@ namespace WebApplication1.Controllers
         }
 
         // GET: /users
-        //[Authorize(Roles = "Admin")]
         [HttpGet]
+        [Authorize(Roles = "User")]
         public IActionResult GetUsers()
         {
-            if (!IsCurrentAdmin())
-            {
-                return Forbid();
-            }
             var users = _context.Users.Include(x => x.DeviceUsers).ThenInclude(x => x.Device.CompostData).ToList();
             var userDtos = _mapper.Map<List<UserDto>>(users);
             return Ok(userDtos);
@@ -192,16 +188,6 @@ namespace WebApplication1.Controllers
             return _context.Users.Any(e => e.Id == id)
                 || _context.Users.Any(x => x.Email == email)
                 || _context.Users.Any(x => x.Username == username && username != null);
-        }
-
-        private bool IsCurrentAdmin()
-        {
-            var currentUser = _context.Users.Find(HttpContext.User.Identity.Name);
-            if (currentUser.Role == Role.Admin)
-            {
-                return true;
-            }
-            return false;
         }
     }
 }
