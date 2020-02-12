@@ -40,7 +40,7 @@ namespace WebApplication1
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            //services.AddCors();
+            services.AddCors();
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
             services.AddDbContext<CompostDataContext>();
             services.Configure<AppSettings>(Configuration.GetSection("AppSettings"));
@@ -87,10 +87,10 @@ namespace WebApplication1
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
-            //app.UseCors(builder =>
-            //{
-            //    builder.AllowAnyMethod().AllowAnyHeader().AllowAnyOrigin().AllowCredentials();
-            //});
+            app.UseCors(builder =>
+            {
+                builder.AllowAnyMethod().AllowAnyHeader().AllowAnyOrigin().AllowCredentials();
+            });
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
