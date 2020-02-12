@@ -21,6 +21,7 @@ using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using WebApplication1.Infrastucture;
 using WebApplication1.Mapping;
+using WebApplication1.Middleware;
 using WebApplication1.Slices.Devices;
 using WebApplication1.Slices.Users.Models;
 
@@ -87,6 +88,7 @@ namespace WebApplication1
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
+            app.UseOptions();
             app.UseCors(builder =>
             {
                 builder.AllowAnyMethod().AllowAnyHeader().AllowAnyOrigin().AllowCredentials();
