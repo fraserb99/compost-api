@@ -13,6 +13,7 @@ using Microsoft.AspNetCore.Authorization;
 using System.Security;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using WebApplication1.Infrastucture;
+using WebApplication1.Slices.LogIn;
 
 namespace WebApplication1.Controllers
 {
@@ -23,11 +24,13 @@ namespace WebApplication1.Controllers
     {
         private readonly CompostDataContext _context;
         private readonly IMapper _mapper;
+        private ILoginService _loginService;
 
-        public UsersController(CompostDataContext context, IMapper mapper)
+        public UsersController(CompostDataContext context, IMapper mapper, ILoginService loginService)
         {
             _context = context;
             _mapper = mapper;
+            _loginService = loginService;
         }
 
         // GET: /users
@@ -104,14 +107,16 @@ namespace WebApplication1.Controllers
         // POST: users
         [AllowAnonymous]
         [HttpPost]
-        public async Task<IActionResult> PostUser([FromBody] User user)
+        public async Task<IActionResult> PostUser([FromBody] UserInput userInput)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            if (UserExists(user.Id, user.Email, user.Username)) return Conflict("A user with these details already exists");
+            if (UserExists(userInput.Email)) return Conflict("A user with these details already exists");
+
+            var user = _mapper.Map<User>(userInput);
 
             var hasher = new PasswordHasher<User>();
             var hashed = hasher.HashPassword(user, user.Password);
@@ -122,7 +127,10 @@ namespace WebApplication1.Controllers
             _context.Users.Add(user);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetUser", new { id = user.Id }, user);
+            var userDto = _mapper.Map<UserDto>(user);
+            userDto.Token = _loginService.CreateToken(user);
+
+            return CreatedAtAction("GetUser", new { id = user.Id }, userDto);
         }
 
         // DELETE: users/5
@@ -175,7 +183,7 @@ namespace WebApplication1.Controllers
             _context.DeviceUsers.Add(deviceUser);
             _context.SaveChanges();
 
-            return CreatedAtAction("AddDevice", user);
+            return Created("devices", user);
         }
 
         private bool UserExists(Guid id)
@@ -188,6 +196,11 @@ namespace WebApplication1.Controllers
             return _context.Users.Any(e => e.Id == id)
                 || _context.Users.Any(x => x.Email == email)
                 || _context.Users.Any(x => x.Username == username && username != null);
+        }
+
+        private bool UserExists(string email)
+        {
+            return _context.Users.Any(e => e.Email == email);
         }
     }
 }

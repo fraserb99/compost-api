@@ -12,6 +12,7 @@ using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 using WebApplication1.Infrastucture;
+using WebApplication1.Slices.LogIn;
 using WebApplication1.Slices.Users.Models;
 
 namespace WebApplication1.Controllers
@@ -22,12 +23,14 @@ namespace WebApplication1.Controllers
         private readonly CompostDataContext _context;
         private readonly AppSettings _settings;
         private readonly IMapper _mapper;
+        private ILoginService _loginService;
 
-        public LoginController(CompostDataContext context, IOptions<AppSettings> settings, IMapper mapper)
+        public LoginController(CompostDataContext context, IOptions<AppSettings> settings, IMapper mapper, ILoginService loginService)
         {
             _context = context;
             _settings = settings.Value;
             _mapper = mapper;
+            _loginService = loginService;
         }
         [HttpPost]
         public IActionResult Authenticate([FromBody] AuthenticateModel model)
@@ -45,21 +48,8 @@ namespace WebApplication1.Controllers
                 return Forbid();
             }
 
-            var tokenHandler = new JwtSecurityTokenHandler();
-            var key = Encoding.ASCII.GetBytes(_settings.JwtSecret);
-            var tokenDescriptor = new SecurityTokenDescriptor
-            {
-                Subject = new ClaimsIdentity(new Claim[]
-                {
-                    new Claim(ClaimTypes.Name, user.Id.ToString()),
-                    new Claim(ClaimTypes.Role, user.Role.ToString())
-                }),
-                Expires = DateTime.UtcNow.AddDays(7),
-                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
-            };
-            var token = tokenHandler.CreateToken(tokenDescriptor);
             var userDto = _mapper.Map<UserDto>(user);
-            userDto.Token = tokenHandler.WriteToken(token);
+            userDto.Token = _loginService.CreateToken(user);
             return Ok(userDto);
         }
     }

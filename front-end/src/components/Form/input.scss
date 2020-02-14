@@ -1,0 +1,27 @@
+.input-col {
+    margin-left: 5px;
+}
+
+input {
+    padding: 3px;
+    width: 100%;
+    box-sizing: border-box;
+    border: 1px solid grey;
+    border-radius: 3px;
+    outline: none;
+  }
+  
+  input:focus {
+    border: 1px solid black;
+  }
+  
+  .input-group {
+    padding: 5px 0px;
+    height: 3.5em;
+  }
+  
+  .invalid-input {
+    color: red;
+    display: block;
+    text-align: left;
+  }

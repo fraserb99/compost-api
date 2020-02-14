@@ -1,23 +1,36 @@
-import React, { useEffect, useState, useCallback } from 'react';
-import { Table, Button } from 'react-bootstrap';
+import React, { useEffect, useState, useCallback, useContext } from 'react';
+import { Table, Button, Spinner } from 'react-bootstrap';
 import { getDevices } from './actions';
+import { UserContext } from '../../infrastructure/contexts/UserContext';
+import { LogInModalContext } from '../../infrastructure/contexts/LogInModalContext';
 
 export const DevicesPage = props => {
     const [devices, setDevices] = useState();
+    const [loading, setLoading] = useState(true);
+
+    const {user, setUser} = useContext(UserContext);
+    const {setShowLogInModal} = useContext(LogInModalContext);
 
     const fetchDevices = useCallback(async () => {
+        if (!user) {
+            setLoading(false);
+            return;
+        }
+        setLoading(true);
         const devices = await getDevices();
-        console.log(devices);
+
         setDevices(devices);
+        setLoading(false);
     })
 
     useEffect(() => {
         fetchDevices();
-    }, [])
+    }, [user])
 
     return (
         <div>
             <h1>Devices</h1>
+            {user && !loading &&
             <Table>
                 <thead>
                     <tr>
@@ -39,7 +52,18 @@ export const DevicesPage = props => {
                         </tr>
                     ))}
                 </tbody>
-            </Table>
+            </Table>}
+            {loading &&
+                <div className='table-loading'>
+                    <Spinner animation='border'/>
+                </div>}
+            {!user && !loading &&
+            <div>
+                <span>
+                    <Button onClick={() => setShowLogInModal(true)}>Log In</Button> to view devices
+                </span>
+            </div>
+            }
         </div>
     )
 }

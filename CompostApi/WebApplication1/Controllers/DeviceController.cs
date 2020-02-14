@@ -1,4 +1,5 @@
-﻿using CompostApi.Models;
+﻿using AutoMapper;
+using CompostApi.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
@@ -7,20 +8,24 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using WebApplication1.Infrastucture.Middleware;
+using WebApplication1.Infrastucture;
 using WebApplication1.Slices.Devices;
 using WebApplication1.Slices.Devices.Models;
+using WebApplication1.Slices.Users.Models;
 
 namespace WebApplication1.Controllers
 {
     [Route("devices")]
     [ApiController]
+    [Authorize]
     public class DeviceController : ControllerBase
     {
         private CompostDataContext _context;
-        public DeviceController(CompostDataContext context)
+        private IMapper Mapper;
+        public DeviceController(CompostDataContext context, IMapper mapper)
         {
-            _context = context; 
+            _context = context;
+            Mapper = mapper;
         }
 
         [HttpPost]
@@ -34,11 +39,20 @@ namespace WebApplication1.Controllers
         }
 
         [HttpGet]
-        [Authorize(Roles = "Admin")]
-        public ActionResult<List<Device>> Get()
+        public ActionResult<List<DeviceDto>> Get()
         {
-            var user = HttpContext.User;
-            var devices = _context.Devices.Include(device => device.CompostData).ToList();
+            var authedUser = HttpContext.User;
+            var user = _context.Users.Include(x => x.DeviceUsers).ThenInclude(x => x.Device).FirstOrDefault(x => x.Id == new Guid(authedUser.Identity.Name));
+            if (user == null) return Unauthorized();
+
+            List<DeviceDto> devices;
+            if (user.Role == Role.Admin)
+                devices = Mapper.Map<List<DeviceDto>>(_context.Devices.ToList());
+            else
+            {
+                var userDto = Mapper.Map<UserDto>(user);
+                devices = userDto.Devices.ToList();
+            }
             return Ok(devices);
         }
 
@@ -46,7 +60,7 @@ namespace WebApplication1.Controllers
         [Route("{id}")]
         public ActionResult<Device> GetById(string id)
         {
-            var device = _context.Devices.Where(x => x.Id == id).Include(x => x.CompostData).FirstOrDefault();
+            var device = _context.Devices.Where(x => x.Id == id).FirstOrDefault();
 
             if (device == null) return NotFound();
 

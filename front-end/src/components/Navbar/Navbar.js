@@ -11,8 +11,18 @@ import { Link } from 'react-router-dom';
 import NavbarCollapse from 'react-bootstrap/NavbarCollapse';
 import NavbarToggle from 'react-bootstrap/NavbarToggle';
 import brand from './brand.png';
+import { LogInModalContext } from '../../infrastructure/contexts/LogInModalContext';
 
-export const NavBar = ({history, ...props}) => {
+export const NavBar = ({history, location}) => {
+    const {showLogInModal, setShowLogInModal} = useContext(LogInModalContext);
+    const {user, setUser} = useContext(UserContext);
+    console.log(user)
+
+    const logout = useCallback(() => {
+        Cookies.set('compost-jwt', null);
+        setUser(null);
+    });
+
     return (
         <Navbar
             variant='light'
@@ -23,9 +33,34 @@ export const NavBar = ({history, ...props}) => {
             </NavbarBrand>
             <NavbarToggle />
             <NavbarCollapse >
-                <Nav className="mr-auto">
-                    <Nav.Link onClick={() => history.push('/')}><FontAwesomeIcon icon={faHome} /> Home</Nav.Link>
-                    <Nav.Link onClick={() => history.push('/devices')}>Devices</Nav.Link>
+                <Nav className="mr-auto" bsPrefix='tabs'>
+                    <Nav.Link 
+                        onClick={() => history.push('/')}
+                        active={location.pathname == '/'}
+                    >
+                        <FontAwesomeIcon icon={faHome} /> Home
+                    </Nav.Link>
+                    <Nav.Link 
+                        onClick={() => history.push('/devices')}
+                        active={location.pathname.includes('devices')}
+                        
+                    >
+                        Devices
+                    </Nav.Link>
+                    
+                </Nav>
+                <Nav>
+                    {!user ?
+                    <Nav.Link
+                        onClick={() => setShowLogInModal(true)}
+                    >
+                        Log In <FontAwesomeIcon icon={faSignInAlt} />
+                    </Nav.Link>
+                    :
+                    <NavDropdown title={<span><FontAwesomeIcon icon={faUser} /> {user.email} {user.role == 'Admin' && `(${user.role})`}</span>}>
+                        <DropdownItem onClick={() => history.push('user/details')}>Your Account</DropdownItem>
+                        <DropdownItem onClick={() => logout()}>Log Out</DropdownItem>
+                    </NavDropdown>}
                 </Nav>
             </NavbarCollapse>
         </Navbar>

@@ -19,11 +19,12 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
+using WebApplication1.Infrastructure.Middleware;
 using WebApplication1.Infrastucture;
-using WebApplication1.Infrastucture.Middleware;
 using WebApplication1.Mapping;
-using WebApplication1.Middleware;
 using WebApplication1.Slices.Devices;
+using WebApplication1.Slices.LogIn;
+using WebApplication1.Slices.LogIn.Impl;
 using WebApplication1.Slices.Users.Models;
 
 namespace WebApplication1
@@ -46,6 +47,7 @@ namespace WebApplication1
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
             services.AddDbContext<CompostDataContext>();
             services.Configure<AppSettings>(Configuration.GetSection("AppSettings"));
+            services.AddScoped<ILoginService, LoginService>();
 
             var appSettings = Configuration.GetSection("AppSettings").Get<AppSettings>();
             var key = Encoding.ASCII.GetBytes(appSettings.JwtSecret);

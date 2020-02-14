@@ -1,41 +1,64 @@
-import React, { useState, useCallback, useEffect } from 'react';
-import { getDataforDevice } from './actions';
+import React, { useState, useCallback, useEffect, useContext } from 'react';
+import { getDataforDevice, getDevice } from './actions';
 //import { LineChart, CartesianGrid, XAxis, Line, Label, Legend, YAxis, ResponsiveContainer } from 'recharts';
 import moment from 'moment';
 import { FlexibleWidthXYPlot, LineSeries, VerticalGridLines, HorizontalGridLines, Line, LineSeriesCanvas, XAxis, YAxis, LineMarkSeries, Hint } from 'react-vis';
+import { DeviceContext } from '../../infrastructure/contexts/DeviceContext';
+import { UserContext } from '../../infrastructure/contexts/UserContext';
+import { LogInModalContext } from '../../infrastructure/contexts/LogInModalContext';
+import { Button } from 'react-bootstrap';
 
 export const DevicePage = props => {
     const deviceId = props.match.params.deviceId;
+    const [device, setDevice] = useState();
     const [compostData, setCompostData] = useState();
     const [chartData, setChartData] = useState();
     const [currentData, setCurrentData] = useState();
+
+    const {user, setUser} = useContext(UserContext);
+    const {showLogInModal, setShowLogInModal} = useContext(LogInModalContext);
+
+    const fetchDevice = useCallback(async () => {
+        if (!user) return;
+        try {
+            var resp = await getDevice(deviceId);
+            setDevice(resp)
+        } catch (e) {
+            console.log(e)
+        }
+    })
 
     const fetchData = useCallback(async () => {
         var data = await getDataforDevice(deviceId);
         data = data.map(x => ({
             ...x,
-           
         }))
         setCompostData(data);
     })
 
     useEffect(() => {
+        fetchDevice();
         fetchData();
-    }, [])
+    }, [deviceId])
 
     useEffect(() => {
         const data = compostData && compostData.map(x => ({
             x: moment(x.created),
             y: x.temperature
         }))
-        console.log(data)
         setChartData(data);
     }, [compostData])
 
     return (
         <div>
-            <h1>Device: {deviceId}</h1>
-            <FlexibleWidthXYPlot height={300} xType='time-utc' onMouseLeave={() => setCurrentData(null)}>
+            <h1>Device: {device && device.name}</h1>
+            {user && 
+            <FlexibleWidthXYPlot 
+                height={300} 
+                xType='time-utc' 
+                onMouseLeave={() => setCurrentData(null)}
+                margin={{right: 20}}
+            >
                 <VerticalGridLines />
                 <HorizontalGridLines />
                 <XAxis tickTotal={5} />
@@ -57,22 +80,16 @@ export const DevicePage = props => {
                 />
                 {currentData && <Hint 
                     value={currentData} 
-                    format={(data) => ([{title: 'Temp.', value: data.y}])}
+                    format={(data) => ([{title: 'Temp', value: `${data.y}°C`}])}
                 />}
-            </FlexibleWidthXYPlot>
-            {/* <ResponsiveContainer height={600} width='100%'>
-                <LineChart
-                    data={compostData}
-                    margin={{ top: 20, right: 30, left: 15, bottom: 20 }}
-                >
-                    <CartesianGrid stroke='#f5f5f5' />
-                    <XAxis dataKey='created' name='Date' scale='utcTime'/>
-                    <YAxis dataKey='temperature' label={{ value: 'Temp.', angle: 90, position: 'insideLeft', offset: {left: 15} }} />
-                    <Tooltip />
-                    <Line type='monotone' dataKey='temperature' stroke='#ff0000' yAxisId={0} />
-                    <Legend align='right' verticalAlign='top' />
-                </LineChart>
-            </ResponsiveContainer> */}
+            </FlexibleWidthXYPlot>}
+            {!user &&
+            <div>
+                <h2>
+                    <Button onClick={() => setShowLogInModal(true)}>Log In</Button> to view devices
+                </h2>
+            </div>
+            }
         </div>
     )
 }

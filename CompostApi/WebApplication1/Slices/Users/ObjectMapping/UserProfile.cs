@@ -15,6 +15,8 @@ namespace WebApplication1.Slices.Users.ObjectMapping
             CreateMap<User, UserDto>()
                 .ForMember(x => x.Devices, opt => opt.MapFrom(y => y.DeviceUsers.Select(x => x.Device)))
                 .ForMember(x => x.Role, opt => opt.MapFrom(y => Enum.GetName(typeof(Role), y.Role)));
+
+            CreateMap<UserInput, User>();
         }
     }
 }

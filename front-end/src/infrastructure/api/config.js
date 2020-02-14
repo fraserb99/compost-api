@@ -7,7 +7,7 @@ export const buildUrl = (segment) => API_URL + segment;
 export const apiRequest = (url, opts, authorise) => {
     return fetch(url, {
             ...opts,
-            //headers: {...opts.headers, 'Authorization' : `Bearer ${getCookie('jwt')}`}
+            headers: {...opts.headers, 'Authorization' : `Bearer ${getCookie('compost-jwt')}`}
         })
         .then(response => {
             console.log(response)
