@@ -67,3 +67,26 @@ h1 {
   margin: auto;
   width: 40px;
 }
+
+.rv-xy-plot__axis__tick__text {
+  font-weight: 700
+}
+
+.rv-xy-plot__axis__title {
+  font-weight: 600
+}
+
+.chart-options-toolbar {
+  padding: 20px 15px;
+  display: flex;
+  width: 100%;
+  justify-content: flex-end;
+}
+
+.apply-btn {
+  margin: 0 5px;
+}
+
+.apply-row {
+  padding: 0 5px;
+}
