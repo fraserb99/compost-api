@@ -55,53 +55,16 @@ namespace WebApplication1.Controllers
 
         [HttpGet]
         [Route("{deviceId}")]
-        public IActionResult GetForDevice(string deviceId, DateTime start, DateTime end, string res)
+        public IActionResult GetForDevice(string deviceId, DateTime start, DateTime end, int res)
         {
             if (end < start) return BadRequest();
 
-            int stepMins;
-            switch (res)
-            {
-                case "5mins":
-                    stepMins = 5;
-                    break;
+            if (res != 5 && res != 30 && res != 60) return BadRequest();
 
-                case "30mins":
-                    stepMins = 30;
-                    break;
+            var compostData = _context.CompostData
+                .Where(x => x.DeviceId == deviceId && x.Created.Minute % res == 0 && x.Created >= start && x.Created <= end).ToList();
 
-                case "1hour":
-                    stepMins = 60;
-                    break;
 
-                default:
-                    return BadRequest();
-            }
-
-            List<CompostData> compostData = new List<CompostData>();
-            while (start < end)
-            {
-                var nextPoint = start.AddMinutes(stepMins);
-                var data = _context.CompostData.Where(x => x.DeviceId == deviceId && x.Created >= start && x.Created < nextPoint).ToList();
-                if (data.Count == 0)
-                {
-                    start = nextPoint;
-                    continue;
-                }
-                var average = data.Average(x => x.Temperature);
-                var newData = new CompostData
-                {
-                    Created = start,
-                    Temperature = average,
-                    DeviceId = deviceId,
-                    Id = Guid.NewGuid()
-                };
-                compostData.Add(newData);
-
-                start = nextPoint;
-            }
-            
-            
             return Ok(compostData);
         }
     }
