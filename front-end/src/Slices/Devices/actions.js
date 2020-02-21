@@ -14,8 +14,8 @@ export const getDevice = (deviceId) => {
     }, true)
 }
 
-export const getDataforDevice = (deviceId) => {
-    return apiRequest(buildUrl(`/compost/${deviceId}`), {
+export const getDataforDevice = (deviceId, start, end, res) => {
+    return apiRequest(buildUrl(`/compost/${deviceId}?start=${start}&end=${end}&res=${res}`), {
         method: 'GET',
         mode: 'cors'
     }, false)

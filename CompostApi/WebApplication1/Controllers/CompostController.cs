@@ -55,10 +55,17 @@ namespace WebApplication1.Controllers
 
         [HttpGet]
         [Route("{deviceId}")]
-        public IActionResult GetForDevice(string deviceId)
+        public IActionResult GetForDevice(string deviceId, DateTime start, DateTime end, int res)
         {
-            var data = _context.CompostData.Where(x => x.DeviceId == deviceId);
-            return Ok(data);
+            if (end < start) return BadRequest();
+
+            if (res != 5 && res != 30 && res != 60) return BadRequest();
+
+            var compostData = _context.CompostData
+                .Where(x => x.DeviceId == deviceId && x.Created.Minute % res == 0 && x.Created >= start && x.Created <= end).ToList();
+
+
+            return Ok(compostData);
         }
     }
 }

@@ -10,6 +10,7 @@ import { Button, Nav, Dropdown, Tab, Tabs, Row, Col, ButtonGroup, ButtonToolbar,
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCalendarAlt } from '@fortawesome/free-solid-svg-icons';
 import DatePicker from 'react-datepicker';
+import LoadingOverlay from 'react-loading-overlay';
 
 import "react-datepicker/dist/react-datepicker.css";
 
@@ -27,9 +28,11 @@ export const DevicePage = props => {
     const [compostData, setCompostData] = useState();
     const [chartData, setChartData] = useState();
     const [currentData, setCurrentData] = useState();
-    const [chartType, setActiveChartType] = useState('combined');
-    const [startDate, setStartDate] = useState();
-    const [endDate, setEndDate] = useState();
+    const [chartType, setActiveChartType] = useState('temp');
+    const [startDate, setStartDate] = useState(new Date()-5);
+    const [endDate, setEndDate] = useState(new Date);
+    const [res, setRes] = useState(30);
+    const [loading, setLoading] = useState(false);
 
     const {user, setUser} = useContext(UserContext);
     const {showLogInModal, setShowLogInModal} = useContext(LogInModalContext);
@@ -45,7 +48,10 @@ export const DevicePage = props => {
     })
 
     const fetchData = useCallback(async () => {
-        var data = await getDataforDevice(deviceId);
+        const start = moment(startDate).toISOString();
+        const end = moment(endDate).toISOString();
+        setLoading(true);
+        var data = await getDataforDevice(deviceId, start, end, res);
         data = data.map(x => ({
             ...x,
         }))
@@ -58,10 +64,15 @@ export const DevicePage = props => {
     }, [deviceId])
 
     useEffect(() => {
+        fetchData();
+    }, [startDate, endDate, res])
+
+    useEffect(() => {
         const data = compostData && compostData.map(x => ({
             x: moment(x.created),
             y: x.temperature
         }))
+        setLoading(false);
         setChartData(data);
     }, [compostData])
 
@@ -118,19 +129,20 @@ export const DevicePage = props => {
                         <ToggleButtonGroup 
                             size='sm' 
                             name='options' 
-                            defaultValue={1}
+                            defaultValue={res}
                             className='mr-2'
+                            onChange={(value) => setRes(value)}
                         >
-                            <ToggleButton value={1} variant='outline-primary'>5 mins</ToggleButton>
-                            <ToggleButton value={2} variant='outline-primary'>30 mins</ToggleButton>
-                            <ToggleButton value={3} variant='outline-primary'>hourly</ToggleButton>
+                            <ToggleButton value={5} variant='outline-primary'>5 mins</ToggleButton>
+                            <ToggleButton value={30} variant='outline-primary'>30 mins</ToggleButton>
+                            <ToggleButton value={60} variant='outline-primary'>hourly</ToggleButton>
                         </ToggleButtonGroup>
 
                         <ButtonGroup>
                             <Dropdown drop='left'>
                                 <Dropdown.Toggle variant='outline-primary' size='sm'>
                                     <FontAwesomeIcon icon={faCalendarAlt} />
-                                    &nbsp; Last 7 Days
+                                    &nbsp; Select Dates
                                 </Dropdown.Toggle>
                                 
                                 <Dropdown.Menu>
@@ -168,43 +180,46 @@ export const DevicePage = props => {
                         </ButtonGroup>
                     </ButtonToolbar>
                 </div>
-                <FlexibleWidthXYPlot 
-                    height={300} 
-                    xType='time-utc'
-                    // yDomain={getYScale(chartData)}
-                    // xDomain={getXScale(chartData)}
-                    yPadding={50}
-                    onMouseLeave={() => setCurrentData(null)}
-                    margin={{right: 20}}
-                    animation={true}
-                    style={{
-                        text: {fontSize: '16px'}
-                    }}
-                >
-                    {/* <VerticalGridLines />
-                    <HorizontalGridLines /> */}
-                    <XAxis tickTotal={5} />
-                    <YAxis title='Temp (°C)' position='end'
-                    />
-                    <AreaSeries
-                        style={{
-                        strokeWidth: '2px'
-                        }}
-                        color='red'
-                        opacity={0.65}
-                        size={3}
-                        curve={'curveMonotoneX'}
-                        data={chartData}
+                {chartData && chartData.length ?
+                    <FlexibleWidthXYPlot 
+                        height={300} 
+                        xType='time-utc'
+                        // yDomain={getYScale(chartData)}
+                        // xDomain={getXScale(chartData)}
+                        yPadding={50}
+                        onMouseLeave={() => setCurrentData(null)}
+                        margin={{right: 20}}
                         animation={true}
-                        onNearestXY={(value) => {
-                            setCurrentData(value)
+                        style={{
+                            text: {fontSize: '16px'}
+                        }}
+                    >
+                        {/* <VerticalGridLines />
+                        <HorizontalGridLines /> */}
+                        <XAxis tickTotal={5} />
+                        <YAxis title='Temp (°C)' position='end'
+                        />
+                        <AreaSeries
+                            style={{
+                            strokeWidth: '2px'
                             }}
-                    />
-                    {currentData && <Hint 
-                        value={currentData} 
-                        format={(data) => ([{title: 'Temp', value: `${data.y}°C`}])}
-                    />}
-                </FlexibleWidthXYPlot>
+                            color='red'
+                            opacity={0.65}
+                            size={3}
+                            curve={'curveMonotoneX'}
+                            data={chartData}
+                            animation={true}
+                            onNearestXY={(value) => {
+                                setCurrentData(value)
+                                }}
+                        />
+                        {currentData && <Hint 
+                            value={currentData} 
+                            format={(data) => ([{title: 'Temp', value: `${data.y}°C`}, {title: 'Date', value: data.x.format('DD/MM/YY hh:mm')}])}
+                        />}
+                    </FlexibleWidthXYPlot>
+                    :
+                    <h2>No Data found for this period</h2>}
             </Row>}
             {!user &&
             <div>
