@@ -13,6 +13,7 @@ import DatePicker from 'react-datepicker';
 import LoadingOverlay from 'react-loading-overlay';
 
 import "react-datepicker/dist/react-datepicker.css";
+import { ChartToolbar } from './components/ChartToolbar';
 
 const getYScale = data => {
     if (!data) return [20, 80];
@@ -20,6 +21,49 @@ const getYScale = data => {
 
 const getXScale = data => {
     if (!data) return [moment().subtract(7, 'days'), moment()]
+}
+
+const getMetric = (data, chartType) => {
+    switch (chartType) {
+        case 'temp':
+            return data.temperature;
+        case 'moisture':
+            return data.moisture;
+        case 'depth':
+            return data.depth;
+        default:
+            return data.temperature;
+    }
+}
+
+const formatHint = (data, chartType) => {
+    var title = '';
+    var units = '';
+
+    switch (chartType) {
+        case 'temp':
+            title = 'Temp';
+            units = '°C';
+            break;
+        case 'moisture':
+            title = 'Moisture';
+            units = '%';
+            break;
+        case 'depth':
+            title = 'Depth';
+            units = 'cm';
+            break;
+        default:
+            break;
+    }
+
+    return {title, value: `${data.y}${units}`}
+}
+
+const chartTitles = {
+    'temp': 'Temp (°C)',
+    'moisture': 'Moisture (%)',
+    'depth': 'Depth (cm)'
 }
 
 export const DevicePage = props => {
@@ -38,6 +82,7 @@ export const DevicePage = props => {
     const {showLogInModal, setShowLogInModal} = useContext(LogInModalContext);
 
     const fetchDevice = useCallback(async () => {
+        console.log(user)
         if (!user) return;
         try {
             var resp = await getDevice(deviceId);
@@ -61,7 +106,7 @@ export const DevicePage = props => {
     useEffect(() => {
         fetchDevice();
         fetchData();
-    }, [deviceId])
+    }, [deviceId, user])
 
     useEffect(() => {
         fetchData();
@@ -70,12 +115,13 @@ export const DevicePage = props => {
     useEffect(() => {
         const data = compostData && compostData.map(x => ({
             x: moment(x.created),
-            y: x.temperature
+            y: getMetric(x, chartType)
         }))
         setLoading(false);
         setChartData(data);
-    }, [compostData])
+    }, [compostData, chartType])
 
+    console.log(device);
     return (
         <div>
             <h1>Device: {device && device.name}</h1>
@@ -85,12 +131,12 @@ export const DevicePage = props => {
                         <Nav 
                             variant='tabs' 
                             activeKey={chartType} 
-                            onSelect={(k) => setActiveChartType(k)}
+                            onSelect={(k) => {
+                                console.log(k);
+                                setActiveChartType(k)}
+                            }
                             fill
                         >
-                            <Nav.Item>
-                                <Nav.Link eventKey='combined'>Combined</Nav.Link>
-                            </Nav.Item>
                             <Nav.Item>
                                 <Nav.Link eventKey='temp'>Temperature</Nav.Link>
                             </Nav.Item>
@@ -102,90 +148,22 @@ export const DevicePage = props => {
                             </Nav.Item>
                         </Nav>
                     </Col>
-                    {/* <Col lg={2} md={4} sm={6} xs={4}>
-                        <Dropdown drop='right'>
-                            <Dropdown.Toggle variant='secondary'>
-                                Change Range
-                            </Dropdown.Toggle>
-
-                            <Dropdown.Menu>
-                                <Tabs fill defaultActiveKey='date'>
-                                    <Tab eventKey='date' title='Date'>
-                                        Date Page
-                                    </Tab>
-                                    <Tab eventKey='range' title='Range'>
-                                        Range
-                                    </Tab>
-                                </Tabs>
-                            </Dropdown.Menu>
-                        </Dropdown>
-                    </Col> */}
                 </Row>
             }
             {user && 
             <Row>
-                <div className='chart-options-toolbar'>
-                    <ButtonToolbar>
-                        <ToggleButtonGroup 
-                            size='sm' 
-                            name='options' 
-                            defaultValue={res}
-                            className='mr-2'
-                            onChange={(value) => setRes(value)}
-                        >
-                            <ToggleButton value={5} variant='outline-primary'>5 mins</ToggleButton>
-                            <ToggleButton value={30} variant='outline-primary'>30 mins</ToggleButton>
-                            <ToggleButton value={60} variant='outline-primary'>hourly</ToggleButton>
-                        </ToggleButtonGroup>
-
-                        <ButtonGroup>
-                            <Dropdown drop='left'>
-                                <Dropdown.Toggle variant='outline-primary' size='sm'>
-                                    <FontAwesomeIcon icon={faCalendarAlt} />
-                                    &nbsp; Select Dates
-                                </Dropdown.Toggle>
-                                
-                                <Dropdown.Menu>
-                                    <Tabs defaultActiveKey='start'>
-                                        <Tab title='Start' eventKey='start'>
-                                            <DatePicker
-                                                selectsStart
-                                                startDate={startDate}
-                                                endDate={endDate}
-                                                inline
-                                                maxDate={endDate || new Date()}
-                                                onChange={(d) => setStartDate(d)}
-                                            />
-                                        </Tab>
-                                        <Tab title='End' eventKey='end'>
-                                            <DatePicker
-                                                selectsEnd
-                                                startDate={startDate}
-                                                endDate={endDate}
-                                                inline
-                                                minDate={startDate}
-                                                maxDate={new Date()}
-                                                onChange={(d) => setEndDate(d)}
-                                            />
-                                        </Tab>
-                                    </Tabs>
-                                    <span className='apply-row'>
-                                        <small>
-                                            {startDate && moment(startDate).format('DD/MM/YYYY')} - {endDate && moment(endDate).format('DD/MM/YYYY')}
-                                        </small>
-                                        <Button className='float-right apply-btn' size='sm' variant='outline-primary'>Apply</Button>
-                                    </span>
-                                </Dropdown.Menu>
-                            </Dropdown>
-                        </ButtonGroup>
-                    </ButtonToolbar>
-                </div>
+                <ChartToolbar
+                    startDate={startDate}
+                    setStartDate={setStartDate}
+                    endDate={endDate}
+                    setEndDate={setEndDate}
+                    res={res}
+                    setRes={setRes}
+                />
                 {chartData && chartData.length ?
                     <FlexibleWidthXYPlot 
                         height={300} 
                         xType='time-utc'
-                        // yDomain={getYScale(chartData)}
-                        // xDomain={getXScale(chartData)}
                         yPadding={50}
                         onMouseLeave={() => setCurrentData(null)}
                         margin={{right: 20}}
@@ -194,14 +172,12 @@ export const DevicePage = props => {
                             text: {fontSize: '16px'}
                         }}
                     >
-                        {/* <VerticalGridLines />
-                        <HorizontalGridLines /> */}
                         <XAxis tickTotal={5} />
-                        <YAxis title='Temp (°C)' position='end'
+                        <YAxis title={chartTitles[chartType]} position='end'
                         />
                         <AreaSeries
                             style={{
-                            strokeWidth: '2px'
+                                strokeWidth: '2px'
                             }}
                             color='red'
                             opacity={0.65}
@@ -215,7 +191,7 @@ export const DevicePage = props => {
                         />
                         {currentData && <Hint 
                             value={currentData} 
-                            format={(data) => ([{title: 'Temp', value: `${data.y}°C`}, {title: 'Date', value: data.x.format('DD/MM/YY hh:mm')}])}
+                            format={(data) => ([formatHint(data, chartType), {title: 'Date', value: data.x.format('DD/MM/YY hh:mm')}])}
                         />}
                     </FlexibleWidthXYPlot>
                     :

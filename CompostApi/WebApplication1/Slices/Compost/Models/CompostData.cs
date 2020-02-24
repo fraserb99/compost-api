@@ -14,5 +14,7 @@ namespace CompostApi.Models
         public string DeviceId { get; set; }
         public double Temperature { get; set; }
         public DateTime Created { get; set; }
+        public int Depth { get; set; }
+        public int Moisture { get; set; }
     }
 }
